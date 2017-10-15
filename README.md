@@ -6,8 +6,10 @@ http://wayou.github.io/t-rex-runner/
 
 A convolutional neural network is being to predict the keyboard input.
 
-getdata.py: Collects training images and stores them in data/<class_name>
-getkeys.py: Contains helper function for getting keyboard inputs 
-            (Source :https://github.com/Sentdex/pygta5/blob/master/Versions/v0.02/getkeys.py)
+## getdata.py:<br />
+Collects training images and stores them in data/<class_name><br />  
+## getkeys.py:  <br />
+Contains helper function for getting keyboard inputs  <br />
+(Source :https://github.com/Sentdex/pygta5/blob/master/Versions/v0.02/getkeys.py)  <br />
          
 Different models are implemented in keras and tensorflow.
