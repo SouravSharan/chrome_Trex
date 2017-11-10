@@ -2,7 +2,37 @@
 import tensorflow as tf
 import numpy as np
 import time
-from loaddata_2 import read_images
+
+########Load data#########
+
+loadpath = "G:/Works/Chrome T-rex/tensorflow/custom_data.npz"
+l = np.load(loadpath)
+
+l.files
+
+#Parse data
+trainimg = l["trainimg"]
+trainlabel = l["trainlabel"]
+ntrain     = trainimg.shape[0]
+nclass     = trainlabel.shape[1]
+dim        = trainimg.shape[1]
+
+print ("%d train images loaded" % (ntrain))
+print ("%d dimensional input"   % (dim))
+print ("%d classes"             % (nclass))
+print ("shape of 'trainimg' is %s" % (trainimg.shape,))
+
+'''
+trainimg_tensor = np.ndarray((ntrain, 340, 340, 1))
+for i in range(ntrain):
+    currimg = trainimg[i, :]
+    currimg = np.reshape(currimg, [340, 340, 1])
+    trainimg_tensor[i, :, :, :] = currimg
+
+print ("shape of trainimg_tensor is %s" % (trainimg_tensor.shape,))
+'''
+##########################
+
 ########## CNN ##########
 
 # Convolutional Layer 1
@@ -33,10 +63,10 @@ stride4_y = 2
 fc_size = 128
 
 #Image Dimentions
-img_w = 64
-img_h = 64
+img_w = 340
+img_h = 340
 img_size_flat = img_h*img_w
-num_channels = 3
+num_channels = 1
 
 num_classes = 2
 
@@ -165,28 +195,30 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 session = tf.Session()
 session.run(tf.global_variables_initializer())
 
-train_batch_size = 48
+batch_size = 48
 total_iterations = 0
 
-saver = tf.train.Saver()
+save_step = 1
+saver = tf.train.Saver(max_to_keep=3)
 
 def optimize(num_iterations):
     global total_iterations
     start_time = time.time()
 
-    for i in range(total_iterations, total_iterations + num_iterations):
-        x_batch, y_true_batch = read_images('folder', train_batch_size)
-        images, labels = session.run([x_batch, y_true_batch])
-        feed_dict_train = {x: images, y: labels}
-        print(feed_dict_train)
-        input()
-        session.run(optimizer, feed_dict=feed_dict_train)
+    for epoch in range(total_iterations, total_iterations + num_iterations):
+        num_batch = int(ntrain/batch_size)+1
+        for i in range(num_batch):
+            randidx  = np.random.randint(ntrain, size=batch_size)
+            #batch_xs = train_vectorized[randidx, :]
+            batch_xs = trainimg[randidx, :]
+            batch_ys = trainlabel[randidx, :]
+            session.run(optimizer, feed_dict={x: batch_xs, y_true: batch_ys})
+            print(str(epoch) + ":" + str(i))
 
-        if i % 100 == 0:
-            acc = session.run(accuracy, feed_dict=feed_dict_train)
-            msg = "Optimization Iteration: {0:>6}, Training Accuracy: {1:>6.1%}"
-            print(msg.format(i + 1, acc))
-            saver.save(session, 'tf-model')
+        acc = session.run(accuracy, feed_dict={x: batch_xs, y_true: batch_ys})
+        msg = "Optimization Iteration: {0:>6}, Training Accuracy: {1:>6.1%}"
+        print(msg.format(epoch + 1, acc))
+    saver.save(session, './tf-model' + str(epoch))
 
     total_iterations += num_iterations
 
