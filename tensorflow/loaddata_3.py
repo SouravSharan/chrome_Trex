@@ -14,6 +14,7 @@ imgsize = [340, 340]
 
 # Grayscale
 use_gray = 1
+
 # Save name
 data_name = "custom_data"
 
